@@ -8,3 +8,9 @@ run*
 
 #dataset
 */action_dataset/*
+
+*.jpg
+
+*.mp4
+
+simple_ftp*
