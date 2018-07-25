@@ -3,5 +3,8 @@ models/graph/cmu*/*.pb
 images/*
 *.git
 
-#run_*py
+#testing files starting with run_*py
 run*
+
+#dataset
+*/action_dataset/*
