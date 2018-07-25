@@ -1,0 +1,4 @@
+models/graph/cmu/*.pb
+models/graph/cmu*/*.pb
+images/*
+*.git
