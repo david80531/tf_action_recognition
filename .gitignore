@@ -3,4 +3,5 @@ models/graph/cmu*/*.pb
 images/*
 *.git
 
+#run_*py
 run*
