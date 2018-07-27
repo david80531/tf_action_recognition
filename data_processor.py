@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[6]:
+# In[1]:
 
 
 import argparse
@@ -23,7 +23,7 @@ from tf_pose.estimator import TfPoseEstimator
 from tf_pose.networks import get_graph_path, model_wh
 
 
-# In[ ]:
+# In[2]:
 
 
 logger = logging.getLogger('TfPoseEstimator-Video')
@@ -47,7 +47,7 @@ w, h = model_wh(resolution)
 e = TfPoseEstimator(get_graph_path(model_path), target_size=(w, h))
 
 
-# In[ ]:
+# In[3]:
 
 
 def process_human_data(humans):
@@ -66,7 +66,7 @@ def process_human_data(humans):
         
 
 
-# In[ ]:
+# In[4]:
 
 
 def check_index_range(start, end):
@@ -78,7 +78,7 @@ def check_index_range(start, end):
         raise ValueError('end index is out of range')
 
 
-# In[ ]:
+# In[5]:
 
 
 #@profile(precision=4)  uncomment to show memory info
@@ -108,7 +108,7 @@ def inference_video(path):
             break
 
         frame_no = (cur_frames/num_frames)
-        cap.set(1,frame_no)
+        cap.set(7,frame_no)
         ret_val, image = cap.read()
 
         #print("Frame no: ", frame_no)
@@ -131,7 +131,7 @@ def inference_video(path):
     
 
 
-# In[ ]:
+# In[6]:
 
 
 def get_classification(classname):
@@ -140,7 +140,7 @@ def get_classification(classname):
     return label
 
 
-# In[ ]:
+# In[7]:
 
 
 #@profile(precision=4)  uncomment to show memory info
@@ -176,14 +176,14 @@ def create_training_data(start, end):
     return pickle_file_name
 
 
-# In[ ]:
+# In[8]:
 
 
 def get_video_dict():
     return video_dict
 
 
-# In[1]:
+# In[9]:
 
 
 def show_video_dict():

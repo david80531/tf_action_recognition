@@ -18,7 +18,7 @@ bool comp_candidate(ConnectionCandidate a, ConnectionCandidate b);
 
 int process_paf(int p1, int p2, int p3, float *peaks, int h1, int h2, int h3, float *heatmap, int f1, int f2, int f3, float *pafmap) {
 //    const int THRE_CNT = 4;
-//    const double THRESH_PAF = 0.40;  ##the threshold which means it can be determined
+//    const double THRESH_PAF = 0.40;
     vector<Peak> peak_infos[NUM_PART];
     int peak_cnt = 0;
     for (int part_id = 0; part_id < NUM_PART; part_id ++) {
@@ -42,13 +42,13 @@ int process_paf(int p1, int p2, int p3, float *peaks, int h1, int h2, int h3, fl
             peak_infos_line.push_back(peak_infos[part_id][i]);
         }
     }
-    
+
     // Start to Connect
     vector<Connection> connection_all[COCOPAIRS_SIZE];
     for (int pair_id = 0; pair_id < COCOPAIRS_SIZE; pair_id ++) {
         vector<ConnectionCandidate> candidates;
-        vector<Peak>& peak_a_list = peak_infos[COCOPAIRS[pair_id][0]]; //##connection start list
-        vector<Peak>& peak_b_list = peak_infos[COCOPAIRS[pair_id][1]]; //##connection end list
+        vector<Peak>& peak_a_list = peak_infos[COCOPAIRS[pair_id][0]];
+        vector<Peak>& peak_b_list = peak_infos[COCOPAIRS[pair_id][1]];
 
         if (peak_a_list.size() == 0 || peak_b_list.size() == 0) {
             continue;
@@ -124,7 +124,7 @@ int process_paf(int p1, int p2, int p3, float *peaks, int h1, int h2, int h3, fl
         }
     }
 
-    // Generate subset  ##To know how many people are there ?
+    // Generate subset
     subset.clear();
     for (int pair_id = 0; pair_id < COCOPAIRS_SIZE; pair_id ++) {
         vector<Connection>& conns = connection_all[pair_id];
@@ -222,14 +222,13 @@ vector<VectorXY> get_paf_vectors(float *pafmap, const int& ch_id1, const int& ch
     for (int i = 0; i < STEP_PAF; i ++) {
         int location_x = roundpaf(peak1.x + i * STEP_X);
         int location_y = roundpaf(peak1.y + i * STEP_Y);
-        
-        //mappin to PAF, determine the vector
+
         VectorXY v;
         v.x = PAF(location_y, location_x, ch_id1);
         v.y = PAF(location_y, location_x, ch_id2);
         paf_vectors.push_back(v);
     }
-    
+
     return paf_vectors;
 }
 
