@@ -24,4 +24,4 @@ Download labeled video dataset to train the action recognizing model
 $ bash download_dataset.sh
 ```
 ### Resource
-[Action Dataset Resource and paper] (https://github.com/jinwchoi/awesome-action-recognition)
+#####[Action Dataset Resource and paper](https://github.com/jinwchoi/awesome-action-recognition)
