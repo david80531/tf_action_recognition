@@ -1,7 +1,5 @@
 cd ..
 
-echo $PWD"/action_dataset"
-
 if [ -d $PWD"/action_dataset" ]; then
     # 目錄 /path/to/dir 存在
     echo "action_dataset already exist."
