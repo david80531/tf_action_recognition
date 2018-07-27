@@ -78,7 +78,7 @@ def check_index_range(start, end):
         raise ValueError('end index is out of range')
 
 
-# In[5]:
+# In[10]:
 
 
 #@profile(precision=4)  uncomment to show memory info
@@ -90,6 +90,7 @@ def inference_video(path):
     num_frames = float(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     #print ("All Frames: " ,num_frames)
     cur_frames = 0.0
+    count = 0
     step = (num_frames / 20.0) 
     #---------------modified----------------#
 
@@ -103,12 +104,12 @@ def inference_video(path):
     if cap.isOpened() is False:
         print("Error opening video stream or file")
 
-    while (cap.isOpened()):   
-        if(cur_frames >= num_frames):
+    while (cap.isOpened()):
+        if(cur_frames >= num_frames or count >= 20):
             break
 
         frame_no = (cur_frames/num_frames)
-        cap.set(7,frame_no)
+        cap.set(1,frame_no)
         ret_val, image = cap.read()
 
         #print("Frame no: ", frame_no)
@@ -121,6 +122,7 @@ def inference_video(path):
             single_video_features = np.append(single_video_features, frame_feature) 
 
         cur_frames+=step
+        count += 1
         if cv2.waitKey(1) == 27:
             break
     #print (single_video_features)
