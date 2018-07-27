@@ -105,8 +105,10 @@ class PoseEstimator:
 
     @staticmethod
     def estimate_paf(peaks, heat_mat, paf_mat):
-        pafprocess.process_paf(peaks, heat_mat, paf_mat)
-
+        #use pafprocess to know the message from peaks , heat_mat, paf_mat these three tensors
+        
+        pafprocess.process_paf(peaks, heat_mat, paf_mat)#In c++, the parameters which aren't passed will use the default value
+        
         humans = []
         for human_id in range(pafprocess.get_num_humans()):
             human = Human([])
@@ -124,7 +126,7 @@ class PoseEstimator:
                     float(pafprocess.get_part_y(c_idx)) / heat_mat.shape[0],
                     pafprocess.get_part_score(c_idx)
                 )
-
+                #print('human_id=',human_id,',',human.body_parts[part_idx])
             if is_added:
                 score = pafprocess.get_score(human_id)
                 human.score = score
@@ -161,6 +163,7 @@ class TfPoseEstimator:
         self.upsample_size = tf.placeholder(dtype=tf.int32, shape=(2,), name='upsample_size')
         self.tensor_heatMat_up = tf.image.resize_area(self.tensor_output[:, :, :, :19], self.upsample_size,
                                                       align_corners=False, name='upsample_heatmat')
+        
         self.tensor_pafMat_up = tf.image.resize_area(self.tensor_output[:, :, :, 19:], self.upsample_size,
                                                      align_corners=False, name='upsample_pafmat')
         smoother = Smoother({'data': self.tensor_heatMat_up}, 25, 3.0)
@@ -359,19 +362,24 @@ class TfPoseEstimator:
         img = npimg
         if resize_to_default:
             img = self._get_scaled_img(npimg, None)[0][0]
+
         peaks, heatMat_up, pafMat_up = self.persistent_sess.run(
             [self.tensor_peaks, self.tensor_heatMat_up, self.tensor_pafMat_up], feed_dict={
                 self.tensor_image: [img], self.upsample_size: upsample_size
             })
+        #peaks= (1, 300, 500, 19)
+        #heatMat_up= (1, 300, 500, 19)
+        #pafMat_up= (1, 300, 500, 38)
         peaks = peaks[0]
         self.heatMat = heatMat_up[0]
         self.pafMat = pafMat_up[0]
         logger.debug('inference- heatMat=%dx%d pafMat=%dx%d' % (
         self.heatMat.shape[1], self.heatMat.shape[0], self.pafMat.shape[1], self.pafMat.shape[0]))
-
+        
         t = time.time()
         humans = PoseEstimator.estimate_paf(peaks, self.heatMat, self.pafMat)
         logger.debug('estimate time=%.5f' % (time.time() - t))
+        
         return humans
 
 

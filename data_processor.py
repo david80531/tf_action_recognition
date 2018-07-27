@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[6]:
 
 
 import argparse
@@ -23,7 +23,7 @@ from tf_pose.estimator import TfPoseEstimator
 from tf_pose.networks import get_graph_path, model_wh
 
 
-# In[2]:
+# In[ ]:
 
 
 logger = logging.getLogger('TfPoseEstimator-Video')
@@ -33,12 +33,13 @@ ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
-
 fps_time = 0
+num_class = 9
 video_dict = { 'PlayingCello':0,'PlayingDaf':1,
                   'PlayingDhol':2,'PlayingFlute':3,
                   'PlayingGuitar':4,'PlayingPiano':5
                   , 'PlayingSitar':6,'PlayingTabla':7,'PlayingViolin':8}
+inv_video_dict = {v: k for k, v in video_dict.items()}
 model_path='mobilenet_thin'
 resolution = '320x240'
 showBG=True
@@ -46,7 +47,7 @@ w, h = model_wh(resolution)
 e = TfPoseEstimator(get_graph_path(model_path), target_size=(w, h))
 
 
-# In[3]:
+# In[ ]:
 
 
 def process_human_data(humans):
@@ -65,10 +66,22 @@ def process_human_data(humans):
         
 
 
-# In[4]:
+# In[ ]:
 
 
-@profile(precision=4)
+def check_index_range(start, end):
+    if(start > end):
+        raise ValueError('start index must be smaller than end index')
+    elif(start < 0):
+        raise ValueError('start index cannot be negative')
+    elif(end>=num_class):
+        raise ValueError('end index is out of range')
+
+
+# In[ ]:
+
+
+#@profile(precision=4)  uncomment to show memory info
 def inference_video(path):
     logger.debug('initialization %s : %s' % (model_path, get_graph_path(model_path)))
     cap = cv2.VideoCapture(path)
@@ -118,50 +131,67 @@ def inference_video(path):
     
 
 
-# In[5]:
+# In[ ]:
 
 
-def get_classification(filename):
+def get_classification(classname):
     label=np.zeros(shape=(9))
-    label[video_dict[filename]]=1
+    label[video_dict[classname]]=1
     return label
 
 
-# In[6]:
+# In[ ]:
 
 
-def show_memory_usage():
-    pid = os.getpid()
-    py = psutil.Process(pid)
-    memoryUse = py.memory_info()[0]/2.**20  # memory use in MB...I think
-    print('memory use:', memoryUse, 'MB')
-
-
-# In[7]:
-
-
-@profile(precision=4)
-def create_traing_data():
+#@profile(precision=4)  uncomment to show memory info
+def create_training_data(start, end):
+    check_index_range(start, end)
     mypath = Path().absolute()
-    dataset_path = os.path.abspath(os.path.join(mypath, os.pardir))+"/action_dataset"
+    dataset_path = os.path.abspath(os.path.join(str(mypath), os.pardir))+"/action_dataset"
 
     feature_set=[]
 
     for subdir, dirs, files in os.walk(dataset_path):
+        finished_dirc = 0
         for dirss in dirs:
             finished_video = 0
-            if (dirss in video_dict and (video_dict[dirss]==4 or video_dict[dirss]==5)):
+            if (dirss in video_dict and(video_dict[dirss]>=start and video_dict[dirss]<=end)):
                 for filename in os.listdir(os.path.join(subdir,dirss)):
                     abs_path =os.path.join(subdir,dirss,filename)
-                    #show_memory_usage()
+                    print("inferencing video: ", filename, " from " , dirss, " directory")
                     feature =inference_video(abs_path)
-                    #show_memory_usage()
                     classification = get_classification(dirss)
                     feature =list(feature)
                     feature_set.append([feature,classification])
-                    print("Finish video: ", finished_video+1)
-                    print("Video ", finished_video," features map: ", feature_set[finished_video])
+                    print("video ", filename, " inferenced done.")
+                    
+                    print("# of finished videos: ", finished_video+1)
+                    print("# of finished directories: ", finished_dirc)
                     finished_video+=1
-    with open('feature_set_c_4_5.pickle','wb') as file:
+                finished_dirc += 1
+    pickle_file_name = 'feature_set_class_'+str(start)+'_to'+str(end)+'.pickle'
+    print('writing data to pickle files.....')
+    with open(pickle_file_name,'wb') as file:
         pickle.dump(feature_set,file)
+    return pickle_file_name
+
+
+# In[ ]:
+
+
+def get_video_dict():
+    return video_dict
+
+
+# In[1]:
+
+
+def show_video_dict():
+    inv_vd_dic = {v: k for k, v in video_dict.items()}
+    print("ClassNumber          Class")
+    print("----------------------------------")
+    for i in range(len(video_dict)):
+        print(i,"               ",inv_vd_dic[i])
+        print("")
+        
 
